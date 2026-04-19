@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopBot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --surface: #0f1620;
+            --surface-2: #111b26;
+            --border: rgba(255, 255, 255, 0.08);
+            --muted: rgba(255, 255, 255, 0.65);
+            --muted-2: rgba(255, 255, 255, 0.45);
+            --text: rgba(255, 255, 255, 0.92);
+            --accent: #22c97a;
+            --accent-2: #1aa463;
+            --danger: #ff5c7a;
+            --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            background: radial-gradient(900px 500px at 20% 0%, rgba(34, 201, 122, 0.18), transparent 55%),
+                radial-gradient(700px 400px at 90% 25%, rgba(34, 201, 122, 0.12), transparent 60%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        .app {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 14px;
+        }
+
+        .shell {
+            width: min(980px, 100%);
+            border: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 16px 18px;
+            background: rgba(15, 22, 32, 0.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(34, 201, 122, 1), rgba(34, 201, 122, 0.35));
+            display: grid;
+            place-items: center;
+            box-shadow: 0 10px 30px rgba(34, 201, 122, 0.22);
+            flex: 0 0 auto;
+        }
+
+        .avatar span {
+            font-size: 18px;
+            filter: saturate(1.1);
+        }
+
+        .title {
+            min-width: 0;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .bot-name {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            position: relative;
+            flex: 0 0 auto;
+        }
+
+        .status-dot.online {
+            background: var(--accent);
+        }
+
+        .status-dot.online::after {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 999px;
+            border: 2px solid rgba(34, 201, 122, 0.45);
+            animation: pulse 1.6s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.55);
+                opacity: 0.9;
+            }
+
+            75% {
+                transform: scale(1);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1.02);
+                opacity: 0;
+            }
+        }
+
+        .subtitle {
+            margin-top: 2px;
+            font-size: 12px;
+            color: var(--muted-2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badges {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .badge strong {
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 700;
+        }
+
+        .statusbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 10px 18px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(17, 27, 38, 0.95);
+        }
+
+        .status-items {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .mini-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .mini-dot.ok {
+            background: var(--accent);
+            box-shadow: 0 0 0 6px rgba(34, 201, 122, 0.12);
+        }
+
+        .mini-dot.bad {
+            background: var(--danger);
+            box-shadow: 0 0 0 6px rgba(255, 92, 122, 0.12);
+        }
+
+        .status-right {
+            font-size: 12px;
+            color: var(--muted-2);
+        }
+
+        .main {
+            display: grid;
+            grid-template-rows: 1fr auto;
+            height: min(760px, calc(100vh - 48px));
+        }
+
+        .messages {
+            padding: 18px 18px 10px 18px;
+            overflow: auto;
+            scroll-behavior: smooth;
+        }
+
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin: 10px 0 14px 0;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .bubble-wrap {
+            max-width: min(640px, 90%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bubble {
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            line-height: 1.45;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: rgba(255, 255, 255, 0.92);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message-row.user .bubble {
+            background: linear-gradient(180deg, rgba(34, 201, 122, 0.18), rgba(34, 201, 122, 0.08));
+            border-color: rgba(34, 201, 122, 0.22);
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: var(--muted-2);
+        }
+
+        .message-row.user .timestamp {
+            text-align: right;
+        }
+
+        .bot-mini-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(34, 201, 122, 0.25);
+            background: rgba(34, 201, 122, 0.1);
+            flex: 0 0 auto;
+        }
+
+        .bot-mini-avatar span {
+            font-size: 14px;
+        }
+
+        .fade-up {
+            animation: fadeUp 240ms ease-out both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 0 18px 14px 18px;
+        }
+
+        .chip {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.86);
+            padding: 9px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 140ms ease, border-color 140ms ease, color 140ms ease, background 140ms ease;
+            user-select: none;
+        }
+
+        .chip:hover {
+            transform: translateY(-2px);
+            border-color: rgba(34, 201, 122, 0.7);
+            color: var(--accent);
+            background: rgba(34, 201, 122, 0.08);
+        }
+
+        .composer {
+            padding: 14px 18px 18px 18px;
+            border-top: 1px solid var(--border);
+            background: rgba(15, 22, 32, 0.92);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 44px;
+            max-height: 160px;
+            resize: none;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(17, 27, 38, 0.85);
+            color: rgba(255, 255, 255, 0.92);
+            outline: none;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .textarea:focus {
+            border-color: rgba(34, 201, 122, 0.55);
+            box-shadow: 0 0 0 4px rgba(34, 201, 122, 0.12);
+        }
+
+        .send {
+            height: 44px;
+            width: 46px;
+            border-radius: 16px;
+            border: 0;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: grid;
+            place-items: center;
+            box-shadow: 0 14px 40px rgba(34, 201, 122, 0.25);
+            transition: transform 140ms ease, filter 140ms ease;
+        }
+
+        .send:disabled {
+            cursor: not-allowed;
+            filter: grayscale(0.6) brightness(0.75);
+            box-shadow: none;
+            opacity: 0.75;
+        }
+
+        .send:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .send svg {
+            width: 18px;
+            height: 18px;
+            fill: rgba(10, 14, 20, 0.9);
+        }
+
+        .typing {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            padding: 2px 0;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.65);
+            animation: bounce 1s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 120ms;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 240ms;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.55;
+            }
+
+            50% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+
+        .email-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .email-input {
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(17, 27, 38, 0.85);
+            color: rgba(255, 255, 255, 0.92);
+            outline: none;
+            font-size: 13px;
+        }
+
+        .email-input:focus {
+            border-color: rgba(34, 201, 122, 0.55);
+            box-shadow: 0 0 0 4px rgba(34, 201, 122, 0.12);
+        }
+
+        .email-btn {
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(34, 201, 122, 0.35);
+            background: rgba(34, 201, 122, 0.12);
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+        }
+
+        .email-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(34, 201, 122, 0.18);
+            border-color: rgba(34, 201, 122, 0.55);
+        }
+
+        .email-state {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .email-state.ok {
+            color: rgba(34, 201, 122, 0.95);
+        }
+
+        .email-state.bad {
+            color: rgba(255, 92, 122, 0.95);
+        }
+
+        @media (max-width: 520px) {
+            .header {
+                padding: 14px 14px;
+            }
+
+            .statusbar {
+                padding: 9px 14px;
+            }
+
+            .messages {
+                padding: 16px 14px 10px 14px;
+            }
+
+            .chips {
+                padding: 0 14px 12px 14px;
+            }
+
+            .composer {
+                padding: 12px 14px 14px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="shell">
+            <div class="header">
+                <div class="brand">
+                    <div class="avatar" aria-hidden="true"><span>🛍️</span></div>
+                    <div class="title">
+                        <div class="title-row">
+                            <div id="botName" class="bot-name">ShopBot</div>
+                            <div id="headerStatusDot" class="status-dot"></div>
+                        </div>
+                        <div id="botSubtitle" class="subtitle">Fashion assistant</div>
+                    </div>
+                </div>
+                <div class="badges">
+                    <div class="badge"><span>Model:</span> <strong id="modelBadge">mistral</strong></div>
+                </div>
+            </div>
+
+            <div class="statusbar">
+                <div class="status-items">
+                    <div class="status-item">
+                        <div id="flaskDot" class="mini-dot"></div>
+                        <div>Flask</div>
+                        <div id="flaskText" style="color: rgba(255, 255, 255, 0.78)">Checking…</div>
+                    </div>
+                    <div class="status-item">
+                        <div id="ollamaDot" class="mini-dot"></div>
+                        <div>Ollama</div>
+                        <div id="ollamaText" style="color: rgba(255, 255, 255, 0.78)">Checking…</div>
+                    </div>
+                </div>
+                <div id="statusRight" class="status-right">Ready</div>
+            </div>
+
+            <div class="main">
+                <div id="messages" class="messages" aria-live="polite"></div>
+                <div id="chips" class="chips"></div>
+            </div>
+
+            <div class="composer">
+                <div class="input-row">
+                    <textarea id="messageInput" class="textarea"
+                        placeholder="Ask about shipping, returns, sizing, or orders…" rows="1"></textarea>
+                    <button id="sendBtn" class="send" title="Send" aria-label="Send">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                d="M3.4 20.3 21 12 3.4 3.7c-.8-.4-1.6.3-1.4 1.2l1.6 6.1c.1.4.5.7.9.7H13c.5 0 .9.4.9.9s-.4.9-.9.9H4.5c-.4 0-.8.3-.9.7l-1.6 6.1c-.2.9.6 1.6 1.4 1.2Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            store: null,
+            health: null,
+            conversation: [],
+            typingRowEl: null,
+            emailCaptureShown: false,
+            emailCaptured: false,
+        };
+
+        const el = {
+            messages: document.getElementById("messages"),
+            chips: document.getElementById("chips"),
+            input: document.getElementById("messageInput"),
+            sendBtn: document.getElementById("sendBtn"),
+            botName: document.getElementById("botName"),
+            botSubtitle: document.getElementById("botSubtitle"),
+            modelBadge: document.getElementById("modelBadge"),
+            headerStatusDot: document.getElementById("headerStatusDot"),
+            flaskDot: document.getElementById("flaskDot"),
+            flaskText: document.getElementById("flaskText"),
+            ollamaDot: document.getElementById("ollamaDot"),
+            ollamaText: document.getElementById("ollamaText"),
+            statusRight: document.getElementById("statusRight"),
+        };
+
+        function formatTime(d) {
+            return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function scrollToBottom() {
+            el.messages.scrollTop = el.messages.scrollHeight;
+        }
+
+        function setDot(dotEl, ok) {
+            dotEl.classList.remove("ok", "bad");
+            if (ok === true) dotEl.classList.add("ok");
+            if (ok === false) dotEl.classList.add("bad");
+        }
+
+        function setHeaderOnline(ok) {
+            el.headerStatusDot.classList.toggle("online", !!ok);
+        }
+
+        function clearChips() {
+            el.chips.innerHTML = "";
+        }
+
+        function showChips(chips) {
+            clearChips();
+            (chips || []).forEach((label) => {
+                const btn = document.createElement("button");
+                btn.className = "chip";
+                btn.type = "button";
+                btn.textContent = label;
+                btn.addEventListener("click", () => {
+                    sendMessage(label);
+                });
+                el.chips.appendChild(btn);
+            });
+        }
+
+        function createBotMiniAvatar() {
+            const a = document.createElement("div");
+            a.className = "bot-mini-avatar";
+            const s = document.createElement("span");
+            s.textContent = "🛍️";
+            a.appendChild(s);
+            return a;
+        }
+
+        function addMessage(role, text, opts = {}) {
+            const now = new Date();
+            const row = document.createElement("div");
+            row.className = `message-row ${role === "user" ? "user" : "bot"} fade-up`;
+
+            if (role !== "user") {
+                row.appendChild(createBotMiniAvatar());
+            }
+
+            const wrap = document.createElement("div");
+            wrap.className = "bubble-wrap";
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+            if (opts.node) {
+                bubble.appendChild(opts.node);
+            } else {
+                bubble.textContent = text || "";
+            }
+
+            const ts = document.createElement("div");
+            ts.className = "timestamp";
+            ts.textContent = formatTime(now);
+
+            wrap.appendChild(bubble);
+            wrap.appendChild(ts);
+            row.appendChild(wrap);
+
+            el.messages.appendChild(row);
+            scrollToBottom();
+
+            if (!opts.ephemeral && typeof text === "string" && text.trim().length > 0) {
+                state.conversation.push({ role: role === "user" ? "user" : "assistant", content: text });
+            }
+
+            return row;
+        }
+
+        function showTyping(show) {
+            if (show) {
+                if (state.typingRowEl) return;
+
+                const dots = document.createElement("div");
+                dots.className = "typing";
+                for (let i = 0; i < 3; i++) {
+                    const d = document.createElement("div");
+                    d.className = "typing-dot";
+                    dots.appendChild(d);
+                }
+
+                state.typingRowEl = addMessage("bot", "", { node: dots, ephemeral: true });
+                return;
+            }
+
+            if (state.typingRowEl) {
+                state.typingRowEl.remove();
+                state.typingRowEl = null;
+            }
+        }
+
+        function looksLikeEmail(value) {
+            const v = String(value || "").trim();
+            return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v);
+        }
+
+        function maybeShowEmailCaptureForm(delayMs = 0) {
+            if (state.emailCaptureShown || state.emailCaptured) return;
+
+            state.emailCaptureShown = true;
+            window.setTimeout(() => {
+                const container = document.createElement("div");
+                const title = document.createElement("div");
+                title.style.fontWeight = "700";
+                title.textContent = "Want me to help with your order?";
+
+                const body = document.createElement("div");
+                body.style.marginTop = "6px";
+                body.style.color = "rgba(255,255,255,0.86)";
+                body.textContent = "Share your email and we’ll follow up with order help or updates.";
+
+                const form = document.createElement("form");
+                form.className = "email-form";
+
+                const input = document.createElement("input");
+                input.className = "email-input";
+                input.type = "email";
+                input.placeholder = "you@example.com";
+                input.autocomplete = "email";
+
+                const btn = document.createElement("button");
+                btn.className = "email-btn";
+                btn.type = "submit";
+                btn.textContent = "Submit";
+
+                const stateEl = document.createElement("div");
+                stateEl.className = "email-state";
+
+                form.appendChild(input);
+                form.appendChild(btn);
+
+                form.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    const email = input.value.trim();
+                    if (!looksLikeEmail(email)) {
+                        stateEl.className = "email-state bad";
+                        stateEl.textContent = "Please enter a valid email address.";
+                        input.focus();
+                        return;
+                    }
+
+                    state.emailCaptured = true;
+                    stateEl.className = "email-state ok";
+                    stateEl.textContent = "Thanks! We’ll use this email for order follow-up.";
+                    input.disabled = true;
+                    btn.disabled = true;
+                    showChips(["Track another order", "Shipping policy", "Return policy", "Store hours"]);
+                });
+
+                container.appendChild(title);
+                container.appendChild(body);
+                container.appendChild(form);
+                container.appendChild(stateEl);
+
+                addMessage("bot", "", { node: container, ephemeral: true });
+                scrollToBottom();
+                input.focus();
+            }, Math.max(0, delayMs));
+        }
+
+        function getContextualChips(lastUserText, lastBotText) {
+            const u = String(lastUserText || "").toLowerCase();
+            const b = String(lastBotText || "").toLowerCase();
+
+            if (u.includes("return") || b.includes("return")) {
+                return ["Return policy", "Start a return", "Shipping policy", "Store hours"];
+            }
+            if (u.includes("ship") || u.includes("delivery") || b.includes("ship")) {
+                return ["Shipping policy", "Express shipping", "Return policy", "Contact support"];
+            }
+            if (u.includes("hour") || u.includes("open") || b.includes("hours")) {
+                return ["Store hours", "Contact support", "Shipping policy", "Return policy"];
+            }
+            if (u.includes("track") || u.includes("order")) {
+                return ["Track my order", "Return policy", "Shipping policy", "Contact support"];
+            }
+            return ["Shipping policy", "Return policy", "Store hours", "Contact support"];
+        }
+
+        async function sendMessage(forcedText) {
+            const text = typeof forcedText === "string" ? forcedText : el.input.value;
+            const trimmed = String(text || "").trim();
+            if (!trimmed) return;
+
+            addMessage("user", trimmed);
+            el.input.value = "";
+            resizeTextarea();
+            clearChips();
+
+            const lower = trimmed.toLowerCase();
+            if (lower.includes("track") || lower.includes("order")) {
+                maybeShowEmailCaptureForm(0);
+            }
+
+            el.sendBtn.disabled = true;
+            showTyping(true);
+
+            try {
+                const resp = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: state.conversation }),
+                });
+
+                const data = await resp.json().catch(() => ({}));
+                showTyping(false);
+                el.sendBtn.disabled = false;
+
+                if (!resp.ok) {
+                    const msg = data && typeof data.reply === "string" ? data.reply : "Sorry—ShopBot ran into an error. Please try again.";
+                    addMessage("bot", msg);
+                    showChips(getContextualChips(trimmed, msg));
+                    return;
+                }
+
+                const replyText = data && typeof data.reply === "string" ? data.reply : "Sorry—ShopBot didn’t receive a reply. Please try again.";
+                addMessage("bot", replyText);
+                showChips(getContextualChips(trimmed, replyText));
+
+                if (replyText.toLowerCase().includes("email")) {
+                    maybeShowEmailCaptureForm(700);
+                }
+            } catch (e) {
+                showTyping(false);
+                el.sendBtn.disabled = false;
+                addMessage(
+                    "bot",
+                    "I can’t reach the Python backend right now. Start the server with: python app.py"
+                );
+                showChips(["Try again", "Shipping policy", "Return policy", "Store hours"]);
+            }
+        }
+
+        function resizeTextarea() {
+            el.input.style.height = "auto";
+            el.input.style.height = Math.min(el.input.scrollHeight, 160) + "px";
+        }
+
+        async function loadStoreInfo() {
+            const resp = await fetch("/store-info", { cache: "no-store" });
+            if (!resp.ok) throw new Error("store-info failed");
+            return resp.json();
+        }
+
+        async function loadHealth() {
+            const resp = await fetch("/health", { cache: "no-store" });
+            if (!resp.ok) throw new Error("health failed");
+            return resp.json();
+        }
+
+        function applyStatus() {
+            const flaskOnline = !!state.store;
+            const ollamaOnline = !!(state.health && state.health.ollama_running);
+
+            setDot(el.flaskDot, flaskOnline);
+            el.flaskText.textContent = flaskOnline ? "Online" : "Offline";
+
+            setDot(el.ollamaDot, ollamaOnline);
+            el.ollamaText.textContent = ollamaOnline ? "Connected" : "Offline";
+
+            const currentModel = state.health && typeof state.health.model === "string" ? state.health.model : "mistral";
+            el.modelBadge.textContent = currentModel;
+
+            const subtitleParts = [];
+            if (state.store && state.store.tagline) subtitleParts.push(state.store.tagline);
+            if (ollamaOnline) subtitleParts.push("AI ready");
+            el.botSubtitle.textContent = subtitleParts.length ? subtitleParts.join(" • ") : "Fashion assistant";
+
+            setHeaderOnline(flaskOnline && ollamaOnline);
+
+            if (!flaskOnline) {
+                el.statusRight.textContent = "Backend offline";
+            } else if (!ollamaOnline) {
+                el.statusRight.textContent = "Ollama offline";
+            } else {
+                el.statusRight.textContent = "Ready";
+            }
+        }
+
+        function startGreeting() {
+            const storeName = state.store && state.store.name ? state.store.name : "our store";
+            addMessage("bot", `Hi! I’m ShopBot — your assistant for ${storeName}.`);
+            window.setTimeout(() => {
+                addMessage("bot", "Ask me about shipping, returns, store hours, or help with an order. I’ll keep it quick.");
+                showChips(["Shipping policy", "Return policy", "Store hours", "Track my order"]);
+            }, 600);
+        }
+
+        async function bootstrap() {
+            resizeTextarea();
+            el.sendBtn.disabled = false;
+
+            el.input.addEventListener("input", resizeTextarea);
+            el.sendBtn.addEventListener("click", () => sendMessage());
+            el.input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            const results = await Promise.allSettled([loadStoreInfo(), loadHealth()]);
+
+            if (results[0].status === "fulfilled") {
+                state.store = results[0].value;
+                const storeName = state.store && state.store.name ? state.store.name : "ShopBot";
+                el.botName.textContent = `${storeName} ShopBot`;
+            }
+
+            if (results[1].status === "fulfilled") {
+                state.health = results[1].value;
+            }
+
+            applyStatus();
+
+            if (!state.store) {
+                addMessage(
+                    "bot",
+                    "I can’t reach the Python server. Start it from the shopbot-python folder with: python app.py"
+                );
+                showChips(["Try again", "Shipping policy", "Return policy", "Store hours"]);
+                return;
+            }
+
+            startGreeting();
+        }
+
+        bootstrap();
+    </script>
+</body>
+
+</html>
